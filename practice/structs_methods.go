@@ -24,18 +24,18 @@ func (c Car) Age(currentYear int) int {
 	return currentYear - c.Year
 }
 
-func main() {
-	car := Car{
-		Brand:   "Bentley",
-		Model:   "GTC",
-		Year:    2025,
-		Mileage: 2675,
-	}
-
-	fmt.Println(car.Info())
-	car.Drive(30)
-
-	fmt.Println(car.Info())
-	fmt.Println("Age:", car.Age(2026))
-
-}
+//func main() {
+//	car := Car{
+//		Brand:   "Bentley",
+//		Model:   "GTC",
+//		Year:    2025,
+//		Mileage: 2675,
+//	}
+//
+//	fmt.Println(car.Info())
+//	car.Drive(30)
+//
+//	fmt.Println(car.Info())
+//	fmt.Println("Age:", car.Age(2026))
+//
+//}
