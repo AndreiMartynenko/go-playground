@@ -11,20 +11,26 @@ type Wallet struct {
 
 func (w *Wallet) Pay(amount int) error {
 	if w.Cash < amount {
-		return fmt.Errorf("Not enough cash")
+		return fmt.Errorf("not enough cash")
 	}
+
 	w.Cash -= amount
 	return nil
 }
 
+// String implements the fmt.Stringer interface.
 func (w *Wallet) String() string {
-	return "Кошелёк в котором " + strconv.Itoa(w.Cash) + " денег"
+	return "Wallet containing " + strconv.Itoa(w.Cash) + " units of cash"
 }
 
-// -----
-
 func main() {
-	myWallet := &Wallet{Cash: 100}
-	fmt.Printf("Raw payment : %#v\n", myWallet)
-	fmt.Printf("Способ оплаты: %s\n", myWallet)
+	myWallet := &Wallet{
+		Cash: 100,
+	}
+
+	fmt.Printf("Raw wallet: %#v\n", myWallet)
+	fmt.Printf("Payment method: %s\n", myWallet)
+
+	// Equivalent:
+	fmt.Println(myWallet)
 }

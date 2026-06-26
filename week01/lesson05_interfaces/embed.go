@@ -11,48 +11,56 @@ type Phone struct {
 
 func (p *Phone) Pay(amount int) error {
 	if p.Money < amount {
-		return fmt.Errorf("Not enough money on account")
+		return fmt.Errorf("not enough money on the account")
 	}
+
 	p.Money -= amount
 	return nil
 }
 
 func (p *Phone) Ring(number string) error {
 	if number == "" {
-		return fmt.Errorf("PLease, enter phone")
+		return fmt.Errorf("please enter a phone number")
 	}
+
 	return nil
 }
 
-// --------------
+// -------------------------------------------------------
 
 type Payer interface {
-	Pay(int) error
+	Pay(amount int) error
 }
 
 type Ringer interface {
-	Ring(string) error
+	Ring(number string) error
 }
 
+// NFCPhone combines the Payer and Ringer interfaces.
 type NFCPhone interface {
 	Payer
 	Ringer
 }
 
-// --------------
+// -------------------------------------------------------
 
-func PayForMetwiWithPhone(phone NFCPhone) {
-	err := phone.Pay(1)
-	if err != nil {
-		fmt.Printf("Ошибка при оплате %v\n\n", err)
+// PayForMetroWithPhone accepts any type
+// that implements both Payer and Ringer.
+func PayForMetroWithPhone(phone NFCPhone) {
+	if err := phone.Pay(1); err != nil {
+		fmt.Printf("payment failed: %v\n", err)
 		return
 	}
-	fmt.Printf("Турникет открыт через %T\n\n", phone)
+
+	fmt.Printf("The gate has been opened using %T\n", phone)
 }
 
-// --------------
+// -------------------------------------------------------
 
 func main() {
-	myPhone := &Phone{Money: 9}
-	PayForMetwiWithPhone(myPhone)
+	myPhone := &Phone{
+		Money: 9,
+	}
+
+	PayForMetroWithPhone(myPhone)
 }
