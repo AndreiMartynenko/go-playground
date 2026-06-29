@@ -4,50 +4,85 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"sort"
 )
 
 func main() {
-	out := os.Stdout
-	if !(len(os.Args) == 2 || len(os.Args) == 3) {
-		panic("usage go run main.go . [-f]")
-	}
-	path := os.Args[1]
-	printFiles := len(os.Args) == 3 && os.Args[2] == "-f"
-	err := dirTree(out, path, printFiles)
-	if err != nil {
-		panic(err.Error())
-	}
 }
 
-func dirTree(out io.Writer, path string, printFiles bool) error {
+// preparation for recursion
+func walkDir(out io.Writer, path string, printFiles bool, prefix string) error {
+	//open a folder
 	file, err := os.Open(path)
+
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	entries, err := file.Readdir(0)
+	//read the content
+	content, err := file.Readdir(0)
 	if err != nil {
 		return err
 	}
-	var filtered []os.FileInfo
-	for _, entry := range entries {
-		if entry.Name() == ".DS_Store" {
+	//don't show/include ".DS_Store"
+	var entries []os.FileInfo
+	for _, item := range content {
+		if item.Name() == ".DS_Store" {
 			continue
 		}
-		if !printFiles && !entry.IsDir() {
+		// don't show files only folders
+		if !printFiles && !item.IsDir() {
 			continue
 		}
-		filtered = append(filtered, entry)
+		entries = append(entries, item)
 	}
-	sort.Slice(filtered, func(i, j int) bool { return filtered[i].Name() < filtered[j].Name() })
-	for i, entry := range filtered {
-		prefix := "├───"
-		if i == len(filtered)-1 {
-			prefix = "└───"
+	sort.Slice(entries, func(i, j int) bool {
+		return entries[i].Name() < entries[j].Name()
+	})
+	//let's add some graphic
+	for i, entry := range entries {
+		connector := "├───"
+		if i == len(entries)-1 {
+			connector = "└───"
 		}
-		fmt.Fprintln(out, prefix+entry.Name())
+
+		name := entry.Name()
+		if printFiles && !entry.IsDir() {
+			if entry.Size() == 0 {
+				name += " (empty)"
+			} else {
+				name += fmt.Sprintf(" (%db)", entry.Size())
+			}
+		}
+
+		fmt.Fprintln(out, prefix+connector+name)
+		//fmt.Fprintln(out, entry.Name())
+		nextPath := filepath.Join(path, entry.Name())
+		//fmt.Fprintln(out, nextPath)
+
+		nextPrefix := prefix
+		if i == len(entries)-1 {
+			nextPrefix += "\t"
+		} else {
+			nextPrefix += "│\t"
+		}
+
+		if entry.IsDir() {
+			err := walkDir(out, nextPath, printFiles, nextPrefix)
+			if err != nil {
+				return err
+			}
+		}
 	}
+
 	return nil
+}
+
+// wrapper
+// It doesn't do anything itself. It simply runs the actual algorithm.
+func dirTree(out io.Writer, path string, printFiles bool) error {
+	return walkDir(out, path, printFiles, "")
+
 }
